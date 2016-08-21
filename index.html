@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <script src='http://cdn.jsdelivr.net/vue/1.0.26/vue.min.js'></script>
+  <style type="text/css">
+    body{
+      text-align: center;
+    }
+    span{
+      display: block;
+      position: absolute;
+      background-color: rgb(82, 173, 214);
+      width: 50px;
+      height: 50px;
+      color: #fff;
+      font-size: 36px;
+      border-radius: 7px;
+    }
+    .cell0-0,.cell0-1,.cell0-2{
+      top: 10px;
+    }
+    .cell1-0,.cell1-1,.cell1-2{
+      top: 61px;
+    }
+    .cell2-0,.cell2-1,.cell2-2{
+      top: 112px;
+    } 
+    .cell0-0,.cell1-0,.cell2-0{
+      left: 10px;
+    }
+    .cell0-1,.cell1-1,.cell2-1{
+      left: 61px;
+    }
+    .cell0-2,.cell1-2,.cell2-2{
+      left: 112px;
+    }
+    .begin{
+       display: block;
+       position: absolute;
+       top: 170px;
+       left: 55px;
+       background-color: rgb(82, 173, 214);
+       width: 60px;
+       height: 30px;
+       color: #fff;
+       font-size: 22px;
+       border-radius: 7px;
+    }
+  </style>
+  <title>拼图 by vue.js</title>
+</head>
+<body>
+<div id="app">
+<span v-for="(index,item) in cells" :class="'cell'+item.x+'-'+item.y" @click="changLocation(index)">
+  {{item.v===0?  '' : item.v}}
+</span>
+<div class="begin" @click='tobegin'>开始</div>
+</div>
+</body>
+  <script type="text/javascript">
+    new Vue({
+      el: '#app',
+      data: {
+        message: 'Hello Vue.js!',
+        spaceVal:0,
+        cells: JSON.parse(window.localStorage.getItem('cellsStorage'))||
+               [ 
+                {x:0,y:0,v:1},
+                {x:0,y:1,v:2},
+                {x:0,y:2,v:3},
+                {x:1,y:0,v:4},
+                {x:1,y:1,v:5},
+                {x:1,y:2,v:6},
+                {x:2,y:0,v:7},
+                {x:2,y:1,v:8},
+                {x:2,y:2,v:0}
+              ]
+      },
+      watch: {
+        // 深度 watcher
+        'cells': {
+          handler: function (cells) { 
+          window.localStorage.setItem('cellsStorage',JSON.stringify(cells));
+          if (cells[cells.length-1].v == this.spaceVal) {
+            var that = this;
+            for (var i = 0; i < cells.length-1; i++) {
+             if (that.cells[i].v-1  !== i) {
+                 return;
+              }
+            }
+              alert('success');
+          }
+       },
+      deep: true
+    }
+  },
+      methods:{
+        changLocation:function(index) {
+          // 获取当前点击的cell
+          var clickCell = this.cells[index];
+          // 点击的是空的 直接返回
+          if (clickCell.v === this.spaceVal) {
+              return;
+          }
+          var spaceCell = null;
+          // 获取当前为空的cell 这里取 cell中v值为this.spaceVal 的为空
+          for (var i = 0; i < this.cells.length; i++) {
+            if (this.cells[i].v===this.spaceVal) {
+              spaceCell = this.cells[i];
+              break;
+            }
+          }
+          var tempV = clickCell.v;
+          // 判断空的cell 的上下左右 是否是被点击的cell
+          if (spaceCell.x+1 == clickCell.x && spaceCell.y == clickCell.y ) {
+             clickCell.v = spaceCell.v;
+             spaceCell.v = tempV;
+             return;
+          } if (spaceCell.x == clickCell.x && spaceCell.y+1 == clickCell.y ) {
+             clickCell.v = spaceCell.v;
+             spaceCell.v = tempV;
+             return;
+          } if (spaceCell.x-1 == clickCell.x && spaceCell.y == clickCell.y ) {
+             clickCell.v = spaceCell.v;
+             spaceCell.v = tempV;
+             return;
+          } if (spaceCell.x == clickCell.x && spaceCell.y-1 == clickCell.y ) {
+             clickCell.v = spaceCell.v;
+             spaceCell.v = tempV;
+             return;
+          }
+
+        },
+        tobegin:function() {
+          var arr=[]; 
+          for(var i=0;i<9;i++){ 
+            arr[i]=i; 
+          } 
+          arr.sort(function(){ return 0.5 - Math.random() }) 
+        /*  for (let i = 0; i < arr.length; i++) {
+            this.cells[i].v=arr[i];                       
+          }*/
+          for (var i = 0; i < arr.length; i++) {
+            this.cells[i].v = (function(j){
+              return  arr[j];
+          })(i);
+         }
+        }
+      }
+  })
+  </script>
+</html>
